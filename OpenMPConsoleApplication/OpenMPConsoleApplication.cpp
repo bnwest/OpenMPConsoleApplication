@@ -30,10 +30,10 @@ void calculatePi_v1()
 
 	step = 1.0 / (double) num_steps;
 
-	for ( int i = 0; i<num_steps; i++ ) 
+	for ( int i = 0; i<num_steps; i++ )
 	{
-		double x = ( i + 0.5 ) * step;
-		sum = sum + 4.0 / ( 1.0 + x*x );
+		double x = (i + 0.5) * step;
+		sum = sum + 4.0 / (1.0 + x*x);
 	}
 
 	pi = step * sum;
@@ -52,13 +52,13 @@ void calculatePi_v2()
 	int numThreads = 0;
 
 	step = 1.0 / (double) num_steps;
-    #pragma omp parallel
+	#pragma omp parallel
 	// creates a team of threads, each thread will execute the code block below
 	{
 		int threadId = omp_get_thread_num(); // 0 ... n-1
 		int privateNumThreads = omp_get_num_threads();
-
-        #pragma opm single
+		
+		#pragma opm single
 		{
 			numThreads = privateNumThreads;
 		}
@@ -66,8 +66,8 @@ void calculatePi_v2()
 		sum[threadId] = 0.0;
 		for ( int i = threadId; i < num_steps; i += privateNumThreads )
 		{
-			double x = ( i + 0.5 ) * step;
-			sum[threadId] += ( 4.0 / ( 1.0 + x*x ) ); // false sharing, each thread keeps updating the same cahce line
+			double x = (i + 0.5) * step;
+			sum[threadId] += (4.0 / (1.0 + x*x)); // false sharing, each thread keeps updating the same cahce line
 		}
 	}
 
@@ -89,7 +89,7 @@ void calculatePi_v3()
 	step = 1.0 / (double) num_steps;
 	sum = 0.0;
 
-    #pragma omp parallel
+	#pragma omp parallel
 	// creates a team of threads, each thread will execute the code block below
 	{
 		double privateSum;
@@ -99,11 +99,11 @@ void calculatePi_v3()
 		privateSum = 0.0;
 		for ( int i = threadId; i < num_steps; i += privateNumThreads )
 		{
-			double x = ( i + 0.5 ) * step;
-			privateSum += ( 4.0 / ( 1.0 + x*x ) ); // no false sharing
+			double x = (i + 0.5) * step;
+			privateSum += (4.0 / (1.0 + x*x)); // no false sharing
 		}
 
-        #pragma omp critical
+		#pragma omp critical
 		// or #pragma omp atomic
 		// creates a critical section
 		{
@@ -123,17 +123,16 @@ void calculatePi_v4()
 
 	double step = 1.0 / (double) num_steps;
 
-    #pragma omp parallel for reduction(+:sum)
-	for ( int i = 0; i < num_steps; i++ ) 
+	#pragma omp parallel for reduction(+:sum)
+	for ( int i = 0; i < num_steps; i++ )
 	{
-		double x = ( i + 0.5 ) * step;
-		sum = sum + 4.0 / ( 1.0 + x*x );
+		double x = (i + 0.5) * step;
+		sum = sum + 4.0 / (1.0 + x*x);
 	}
 
 	pi = step * sum;
 
 	printf( "pi=%0.10f\n", pi );
-
 }
 
 int main()
